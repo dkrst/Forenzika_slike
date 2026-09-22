@@ -7,7 +7,7 @@ Prezentacije kolegija *Forenzička analiza digitalne slike* (FESB).
 | # | Predavanje | Izvor | Slajdovi |
 |---|---|---|---|
 | 1 | Uvod u forenziku digitalne slike | [md](Predavanje01-Uvod.md) | [pdf](Predavanje01-Uvod.pdf) |
-| 2 | Uvod u digitalnu obradu i analizu slike | — | — |
+| 2 | Uvod u digitalnu obradu i analizu slike | [md](Predavanje02-Uvod_u_obradu_slike.md) | [pdf](Predavanje02-Uvod_u_obradu_slike.pdf) |
 | 3 | Matematički model slike | — | — |
 
 ## Struktura
@@ -27,7 +27,7 @@ Prezentacije/
 
 ## Generiranje PDF-a
 
-Preduvjeti: `pandoc`, `xelatex`, `lmodern`, DejaVu fontovi; za dijagrame `python3` i `matplotlib`.
+Preduvjeti: `pandoc`, `xelatex`, `lmodern`, DejaVu fontovi; za dijagrame `python3`, `matplotlib`, `opencv-python` i `scikit-image`.
 
 ```
 ./build_slides.py            # sve prezentacije
