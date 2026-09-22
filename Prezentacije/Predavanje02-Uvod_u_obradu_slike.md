@@ -78,7 +78,7 @@ Pri slabom svjetlu vidimo štapićima --- zato u mraku ne raspoznajemo boje.
 - Tri vrste čunjića s maksimumom odziva oko **420, 534 i 564 nm**
 - Odzivi se jako preklapaju
 - Štapići (isprekidano): maksimum oko **498 nm**
-- Model odziva triju vrsta čunjića naziva se **LMS** (detaljno u P3)
+- Model odziva triju vrsta čunjića naziva se **LMS**
 :::
 ::::::
 
@@ -87,7 +87,18 @@ Pri slabom svjetlu vidimo štapićima --- zato u mraku ne raspoznajemo boje.
 ![](slike/p02_metamerizam.png){width=92%}
 
 \begin{deklaracija}
-Oko ne može rekonstruirati spektar: svjetlost svodi na \textbf{tri broja}. Različiti spektri mogu dati istu boju --- i zato su za zapis boje dovoljne tri vrijednosti po pikselu.
+Oko ne može rekonstruirati spektar: svjetlost svodi na \textbf{tri broja}. Fizički različita svjetlost može dati istu boju.
+\end{deklaracija}
+
+## Metamerizam --- primjer zaslona
+
+![](slike/p02_metamerizam_zuta.png){width=100%}
+
+- Zaslon **ne emitira** žutu valnu duljinu --- samo crvenu i zelenu
+- Odziv čunjića je isti, pa vidimo žutu
+
+\begin{deklaracija}
+Različiti spektri mogu dati istu boju --- zato su za zapis i prikaz boje dovoljne tri vrijednosti po pikselu.
 \end{deklaracija}
 
 # Osnove boje
@@ -117,19 +128,51 @@ Oko ne može rekonstruirati spektar: svjetlost svodi na \textbf{tri broja}. Razl
 
 ## Iz boje u sive razine
 
-![](slike/p02_u_sivo.jpg){width=80%}
+![](slike/p02_u_sivo.jpg){width=62%}
+
+$$I = 0{,}299\,R + 0{,}587\,G + 0{,}114\,B$$
 
 - Jednostavni prosjek daje istu sivu za crvenu, zelenu i plavu
-- Težine prate osjetljivost oka --- najveću na zeleno (ITU-R BT.601)
+- Težine prate osjetljivost oka --- najveću na zeleno (ITU-R BT.601, \texttt{cv2.cvtColor})
 
-## Nijansa, zasićenje, intenzitet
+## Koja boja ima najviše crvene, zelene ili plave?
 
-- RGB je praktičan za uređaje, ali ne opisuje boju onako kako je doživljavamo
-- Čovjek boju opisuje drukčije:
-    - **nijansa** (*hue*) --- „koja je to boja": crvena, žuta, plava…
-    - **zasićenje** (*saturation*) --- koliko je boja čista, a koliko „razrijeđena" bijelom
-    - **intenzitet** (*intensity*) --- koliko je svijetla
-- Prostori boja HSI, HSV, Lab --- detaljno u P3
+![](slike/p02_koja_boja.png){width=86%}
+
+## Koja boja ima najviše crvene, zelene ili plave?
+
+![](slike/p02_koja_boja_rgb.png){width=86%}
+
+## Kako „mislimo" boje?
+
+Opažanje boje opisujemo tonom, zasićenjem i svjetlinom:
+
+![](slike/p02_hsv_nizovi.png){width=74%}
+
+\begin{deklaracija}
+Čovjek ne može rastaviti boju na komponente R, G i B, niti odrediti valnu duljinu. Intuitivan opis boje daju prostori HSV, HSI i HLS.
+\end{deklaracija}
+
+## HSV prostor boja
+
+:::::: columns
+::: {.column width="30%"}
+![](slike/p02_hsv_stozac.jpg){width=100%}
+:::
+::: {.column width="68%"}
+- **H** (ton) --- kut na kružnici boja, 0--360°
+    - OpenCV ga zapisuje kao 0--179, da stane u `uint8`
+- **S** (zasićenje) --- udaljenost od osi sivih razina, 0--1
+- **V** (vrijednost) --- položaj na osi sivih: dno je crna, vrh bijela
+- Pretvorba iz RGB je nelinearna
+:::
+::::::
+
+## HSV prostor boja --- primjer
+
+![](slike/p02_hsv_kanali.jpg){width=100%}
+
+- Kada je S ≈ 0, **ton nije definiran** --- kanal H je šum (bijela kaciga, siva pozadina)
 
 # Od svjetla do piksela
 
@@ -168,7 +211,7 @@ Oko ne može rekonstruirati spektar: svjetlost svodi na \textbf{tri broja}. Razl
 
 :::::: columns
 ::: {.column width="32%"}
-![](slike/p02_gama_krivulja.jpg){width=100%}
+![](slike/p02_gama_krivulja.jpg){width=88%}
 :::
 ::: {.column width="66%"}
 - Kodiranje u kameri: $V_c = V_{in}^{1/\gamma}$, prikaz: $V_{out} = V_c^{\gamma}$, tipično $\gamma \approx 2{,}2$
@@ -179,7 +222,7 @@ Oko ne može rekonstruirati spektar: svjetlost svodi na \textbf{tri broja}. Razl
 ::::::
 
 \begin{center}
-\includegraphics[height=0.24\textheight]{slike/p02_gama_izvornik.jpg}\hspace{0.6em}\includegraphics[height=0.24\textheight]{slike/p02_gama_primjeri.jpg}
+\includegraphics[height=0.2\textheight]{slike/p02_gama_izvornik.jpg}\hspace{0.6em}\includegraphics[height=0.2\textheight]{slike/p02_gama_primjeri.jpg}
 \end{center}
 
 ## RAW i obrađena slika
@@ -218,9 +261,33 @@ RAW je najbliži onome što je senzor zabilježio, ali ni RAW datoteka sama po s
 - **Uzorkovanje** --- kontinuirana scena mjeri se u konačnom broju točaka (piksela)
 - **Kvantizacija** --- izmjerena vrijednost zaokružuje se na jednu od konačnog broja razina
 
+## Nyquist-Shannonov teorem
+
+\begin{deklaracija}
+Ako se signal uzorkuje frekvencijom barem \textbf{dvostruko većom} od njegove najviše frekvencije, može se točno rekonstruirati iz uzoraka.
+\end{deklaracija}
+
+![](slike/p02_nyquist_sinus.png){width=60%}
+
+- Prerijetko uzorkovan brzi signal daje iste uzorke kao spori --- **aliasing**
+- U slici je frekvencija uzorkovanja gustoća piksela: detalj finiji od dva piksela pojavljuje se kao lažni, grublji uzorak
+
+## Aliasing u slici i antialiasing
+
+\begin{center}
+\resizebox{0.92\textwidth}{!}{%
+\parbox[t]{6.14cm}{\centering\includegraphics[height=4cm]{slike/p02_aliasing_izvorna.jpg}\\[0.3ex]{\large\itshape izvorna slika}}\hspace{0.3cm}%
+\parbox[t]{6.14cm}{\centering\includegraphics[height=4cm]{slike/p02_aliasing_bez_aa.jpg}\\[0.3ex]{\large\itshape smanjeno bez antialiasinga}}\hspace{0.3cm}%
+\parbox[t]{4.57cm}{\centering\includegraphics[height=4cm]{slike/p02_aliasing_detalj.jpg}\\[0.3ex]{\large\itshape uvećani detalj}}}
+\end{center}
+
+- Cigle na tornju finije su od razmaka piksela smanjene slike → lažni valoviti uzorci (**moiré**)
+- **Antialiasing:** niskopropusno filtriranje *prije* uzorkovanja (u kameri optički filtar ispred senzora)
+- I lažne boje kod demozaikiranja su aliasing --- R i B uzorkovani su samo u svakom drugom pikselu
+
 ## Slika kao matrica
 
-![](slike/p02_matrica.jpg){width=82%}
+![](slike/p02_matrica.jpg){width=74%}
 
 - Slika sivih razina je matrica $f(m, n)$: $m$ je redak, $n$ stupac, ishodište gore lijevo
 
@@ -260,10 +327,84 @@ Ista operacija daje različit rezultat ovisno o biblioteci --- bez ikakve poruke
 
 ## Zašto pomični zarez?
 
-![](slike/p02_float_vs_int.png){height=58%}
+![](slike/p02_float_vs_int.png){height=52%}
 
 - Međurezultati se računaju u pomičnom zarezu, najčešće u rasponu $[0, 1]$
 - U `uint8` se zaokružuje **samo jednom, na kraju** --- svako zaokruživanje trajno gubi informaciju
+
+## Interpolacija
+
+:::::: {.columns align=top}
+::: {.column width="36%"}
+**Najbliži susjed** (*nearest neighbor*)
+
+- Novi piksel preuzima vrijednost najbližeg izvornog piksela
+- Uvećanje = ponavljanje redaka i stupaca
+- Ne stvara nove vrijednosti --- samo ponavlja postojeće
+:::
+::: {.column width="62%"}
+![](slike/p02_interp_najblizi.png){width=100%}
+:::
+::::::
+
+## Interpolacija
+
+:::::: {.columns align=top}
+::: {.column width="36%"}
+**Bilinearna interpolacija**
+
+- Linearno, prvo po retcima, zatim po stupcima
+
+\begin{center}
+\small
+\begin{tabular}{|c|c|}\hline A & B \\ \hline C & D \\ \hline\end{tabular}
+$\rightarrow$
+\begin{tabular}{|c|c|c|}\hline A & e & B \\ \hline f & g & h \\ \hline C & i & D \\ \hline\end{tabular}
+\end{center}
+
+$e = \frac{A+B}{2}, \quad i = \frac{C+D}{2}$
+
+$g = \frac{e+i}{2} = \frac{A+B+C+D}{4}$
+:::
+::: {.column width="62%"}
+![](slike/p02_interp_bilinearna.png){width=100%}
+:::
+::::::
+
+## Interpolacija
+
+:::::: {.columns align=top}
+::: {.column width="36%"}
+**Bikubična interpolacija**
+
+- Uzima u obzir veći broj susjednih piksela: kubni polinom kroz 4 × 4 = 16 susjeda
+- Oštriji rubovi od bilinearne interpolacije
+:::
+::: {.column width="62%"}
+![](slike/p02_interp_bikubicna.png){width=100%}
+:::
+::::::
+
+## Interpolacija
+
+:::::: {.columns align=top}
+::: {.column width="36%"}
+```{=latex}
+\small
+```
+
+**Lanczos (sinc) interpolacija**
+
+$$S(x) = \sum_{i=\lfloor x \rfloor - a + 1}^{\lfloor x \rfloor + a} s_i \, L(x - i)$$
+
+- $L(x) = \mathrm{sinc}(x)\,\mathrm{sinc}(x/a)$ za $|x| < a$
+- 2D: $L(x, y) = L(x)\,L(y)$
+- Približava idealnu rekonstrukciju iz Nyquist-Shannonova teorema
+:::
+::: {.column width="62%"}
+![](slike/p02_interp_lanczos.png){width=100%}
+:::
+::::::
 
 ## Područje interesa (ROI)
 
@@ -338,7 +479,7 @@ h = np.bincount(g.ravel(), minlength=256)    # ili cv2.calcHist
 ![](slike/p02_histogram_rgb.jpg){width=100%}
 
 - Za sliku u boji računaju se tri nezavisna histograma, za svaki kanal posebno
-- Višedimenzionalni histogram opisuje zajedničku raspodjelu kanala (P3)
+- Višedimenzionalni histogram opisuje zajedničku raspodjelu kanala
 
 ## Histogram ne vidi prostor
 
@@ -347,6 +488,12 @@ h = np.bincount(g.ravel(), minlength=256)    # ili cv2.calcHist
 \begin{deklaracija}
 Histogram opisuje samo \textbf{koliko} je kojih vrijednosti, a ne \textbf{gdje} su u slici.
 \end{deklaracija}
+
+## Histogram ne vidi prostor --- primjer
+
+![](slike/p02_histogram_sibice.jpg){height=66%}
+
+- Iste šibice, različito razmještene --- histogrami su gotovo jednaki
 
 ## Čitanje histograma
 
@@ -385,6 +532,16 @@ eq = cv2.equalizeHist(g)
 ## Rastezanje i ujednačavanje
 
 ![](slike/p02_rastezanje_ujednacavanje.jpg){height=86%}
+
+## Lokalno ujednačavanje histograma
+
+\begin{center}
+\parbox[t]{0.3\textwidth}{\centering\includegraphics[height=0.54\textheight]{slike/p02_lokalno_izvornik.jpg}\\[0.3ex]{\small\itshape izvornik}}\hspace{0.02\textwidth}%
+\parbox[t]{0.3\textwidth}{\centering\includegraphics[height=0.54\textheight]{slike/p02_lokalno_globalno.jpg}\\[0.3ex]{\small\itshape globalno ujednačavanje}}\hspace{0.02\textwidth}%
+\parbox[t]{0.3\textwidth}{\centering\includegraphics[height=0.54\textheight]{slike/p02_lokalno_lokalno.jpg}\\[0.3ex]{\small\itshape lokalno ujednačavanje}}
+\end{center}
+
+- Histogram se ujednačava zasebno u manjim područjima slike --- ističu se lokalni detalji (npr. CLAHE)
 
 ## Logaritamsko i eksponencijalno preslikavanje
 
@@ -441,6 +598,46 @@ g = cv2.filter2D(img, -1, k, borderType=cv2.BORDER_REFLECT)
 ## Primjeri filtara
 
 ![](slike/p02_filtri.jpg){height=88%}
+
+## Statistički nelinearni filtri
+
+- **Filtri poretka** (*order-statistic filters*): izlazna vrijednost ovisi o **redoslijedu** vrijednosti piksela u prozoru
+    - **medijan** --- srednja po redu vrijednost
+    - **max** --- najveća vrijednost
+    - **min** --- najmanja vrijednost
+- Nisu linearni: ne mogu se zapisati kao težinska suma, dakle ni kao konvolucija
+
+## Medijan filtar
+
+- Pikseli unutar prozora sortiraju se po veličini, a izlaz je **srednja** vrijednost po redu
+
+\begin{center}
+\begin{tabular}{|c|c|c|}\hline 123 & 112 & 131 \\ \hline 118 & \textbf{243} & 129 \\ \hline 121 & 230 & 117 \\ \hline\end{tabular}
+\qquad$\longrightarrow$\qquad
+\begin{tabular}{|c|c|c|}\hline 123 & 112 & 131 \\ \hline 118 & \textbf{123} & 129 \\ \hline 121 & 230 & 117 \\ \hline\end{tabular}
+
+\vspace{1.5ex}
+{\small sortirano: \; 112 \; 117 \; 118 \; 121 \; \textbf{123} \; 129 \; 131 \; 230 \; 243}
+\end{center}
+
+\begin{deklaracija}
+Medijan filtar dobro uklanja točkasti šum (\textit{salt \& pepper}) i pritom čuva rubove regija.
+\end{deklaracija}
+
+## Medijan i usrednjavanje
+
+\begin{center}
+\parbox[t]{0.18\textwidth}{\centering\includegraphics[width=\linewidth]{slike/p02_median_ulaz.jpg}\\[0.2ex]{\scriptsize ulazna slika}}\hspace{0.01\textwidth}%
+\parbox[t]{0.18\textwidth}{\centering\includegraphics[width=\linewidth]{slike/p02_median_blur3.jpg}\\[0.2ex]{\scriptsize usrednjavanje 3 × 3}}\hspace{0.01\textwidth}%
+\parbox[t]{0.18\textwidth}{\centering\includegraphics[width=\linewidth]{slike/p02_median_gauss3.jpg}\\[0.2ex]{\scriptsize Gaussov filtar 3 × 3}}\hspace{0.01\textwidth}%
+\parbox[t]{0.18\textwidth}{\centering\includegraphics[width=\linewidth]{slike/p02_median_med3.jpg}\\[0.2ex]{\scriptsize medijan 3 × 3}}
+
+\vspace{0.6ex}
+\parbox[t]{0.18\textwidth}{\centering\includegraphics[width=\linewidth]{slike/p02_median_sum.jpg}\\[0.2ex]{\scriptsize 75 \% šuma (\textit{s\&p})}}\hspace{0.01\textwidth}%
+\parbox[t]{0.18\textwidth}{\centering\includegraphics[width=\linewidth]{slike/p02_median_blur9.jpg}\\[0.2ex]{\scriptsize usrednjavanje 9 × 9}}\hspace{0.01\textwidth}%
+\parbox[t]{0.18\textwidth}{\centering\includegraphics[width=\linewidth]{slike/p02_median_gauss9.jpg}\\[0.2ex]{\scriptsize Gaussov filtar 9 × 9}}\hspace{0.01\textwidth}%
+\parbox[t]{0.18\textwidth}{\centering\includegraphics[width=\linewidth]{slike/p02_median_med9.jpg}\\[0.2ex]{\scriptsize medijan 9 × 9}}
+\end{center}
 
 ## Konvolucija u forenzici
 

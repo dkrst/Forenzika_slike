@@ -65,6 +65,24 @@ local function uokviri_deklaracije(blokovi)
   return izlaz
 end
 
+-- Slika bez opisa sama u odlomku pandoc ne pretvara u Figure, pa je beamer
+-- ne centrira. Takav odlomak omata se u okruzenje center. Poziva se nakon
+-- oznacavanja slajdova koji sadrze samo sliku, pa na to ne utjece.
+local function centriraj_slike(blokovi)
+  local izlaz = {}
+  for _, blok in ipairs(blokovi) do
+    if (blok.t == "Para" or blok.t == "Plain") and #blok.content == 1
+       and blok.content[1].t == "Image" then
+      table.insert(izlaz, pandoc.RawBlock("latex", "\\begin{center}"))
+      table.insert(izlaz, blok)
+      table.insert(izlaz, pandoc.RawBlock("latex", "\\end{center}"))
+    else
+      table.insert(izlaz, blok)
+    end
+  end
+  return izlaz
+end
+
 function Pandoc(doc)
   doc.blocks = bez_medjuslajda(doc.blocks)
   doc.blocks = uokviri_deklaracije(doc.blocks)
@@ -97,5 +115,6 @@ function Pandoc(doc)
     end
     i = i + 1
   end
+  doc.blocks = centriraj_slike(doc.blocks)
   return doc
 end

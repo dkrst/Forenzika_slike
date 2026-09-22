@@ -134,6 +134,36 @@ def metamerizam():
     spremi(fig, "p02_metamerizam.png")
 
 
+def metamerizam_zuta():
+    # monokromatska žuta (580 nm) i mješavina crvene i zelene linije sa zaslona;
+    # intenziteti linija računaju se tako da odzivi L i M budu jednaki (S je u oba slučaja ~0)
+    g = lambda wl, m, s: np.exp(-0.5*((wl-m)/s)**2)
+    cun = lambda wl: np.array([g(wl, 564, 50), g(wl, 534, 42), g(wl, 420, 28)])   # L, M, S
+    zuta = 580.0; crv, zel = 630.0, 532.0
+    odz_z = cun(zuta)
+    Mtx = np.column_stack([cun(crv)[:2], cun(zel)[:2]])
+    a_c, a_z = np.linalg.solve(Mtx, odz_z[:2])
+    odz_m = a_c*cun(crv) + a_z*cun(zel)
+    fig, ax = plt.subplots(1, 3, figsize=(13, 3.6), gridspec_kw={"width_ratios": [1.3, 1.3, 1]})
+    for a, linije, nasl in [(ax[0], [(zuta, 1.0)], "monokromatska žuta, 580 nm"),
+                            (ax[1], [(crv, a_c), (zel, a_z)], "zaslon: crvena + zelena")]:
+        for wl, amp in linije:
+            a.plot([wl, wl], [0, amp], color=valna_u_rgb(wl), lw=6, solid_capstyle="butt")
+        a.set_xlim(400, 700); a.set_ylim(0, max(1.0, a_c, a_z)*1.12)
+        a.set_xlabel("valna duljina [nm]"); a.set_yticks([]); a.set_title(nasl, fontsize=12)
+        for sp in ["top", "right", "left"]:
+            a.spines[sp].set_visible(False)
+    x = np.arange(3)
+    ax[2].bar(x-0.18, odz_z, 0.34, color=(0.93, 0.78, 0.0), label="žuta 580 nm")
+    ax[2].bar(x+0.18, odz_m, 0.34, color=SV, label="crvena + zelena")
+    ax[2].set_xticks(x); ax[2].set_xticklabels(["L", "M", "S"]); ax[2].set_yticks([])
+    ax[2].set_title("odziv čunjića", fontsize=12); ax[2].legend(frameon=False, fontsize=9)
+    for sp in ["top", "right", "left"]:
+        ax[2].spines[sp].set_visible(False)
+    fig.tight_layout()
+    spremi(fig, "p02_metamerizam_zuta.png")
+
+
 # ---------------------------------------------------------------- mijesanje boja
 def mijesanje():
     N = 500
@@ -153,6 +183,60 @@ def mijesanje():
     prikazi(a2, sub, "suptraktivno (CMY) — tisak")
     a1.set_facecolor("black")
     spremi(fig, "p02_mijesanje.png")
+
+
+# ---------------------------------------------------------------- percepcija boje (stari slajdovi 27 i 28)
+from matplotlib.patches import Ellipse
+
+# boje očitane iz izvornog slajda (ispunjene elipse)
+KOJA_BOJA = [(221, 38, 38), (255, 0, 0), (255, 79, 92),
+             (35, 79, 92), (0, 79, 92), (35, 92, 71)]
+
+
+def koja_boja(s_vrijednostima, ime):
+    fig, ax = plt.subplots(figsize=(10, 4.4))
+    for k, c in enumerate(KOJA_BOJA):
+        x, y = 1.0 + (k % 3)*2.1, 2.2 - (k // 3)*1.9
+        ax.add_patch(Ellipse((x, y), 1.9, 1.5, fc=np.array(c)/255, ec=(0.25, 0.25, 0.25), lw=0.8))
+        if s_vrijednostima:
+            ax.text(x, y, f"R {c[0]:>3}\nG {c[1]:>3}\nB {c[2]:>3}", ha="center", va="center",
+                    fontsize=15, color="white", family="DejaVu Sans Mono", linespacing=1.3)
+    ax.set_xlim(-0.05, 6.35); ax.set_ylim(-0.6, 3.05); ax.set_aspect("equal"); ax.axis("off")
+    spremi(fig, ime)
+
+
+def hsv_nizovi():
+    redovi = [("Ton (Hue) — dominantna valna duljina",
+               [(255, 0, 0), (255, 255, 0), (0, 255, 0), (0, 255, 255), (0, 0, 255), (255, 0, 0)]),
+              ("Zasićenje (Saturation) — udio čiste boje, odmak od sive",
+               [(255, 0, 0), (255, 51, 51), (255, 102, 102), (255, 153, 153), (255, 204, 204), (204, 204, 204)]),
+              ("Vrijednost (Value) — svjetlina, intenzitet",
+               [(255, 0, 0), (204, 0, 0), (153, 0, 0), (102, 0, 0), (51, 0, 0), (0, 0, 0)])]
+    fig, ax = plt.subplots(figsize=(12, 5.4))
+    for r, (naslov, boje) in enumerate(redovi):
+        y = 2.4 - r*1.25
+        ax.text(0.0, y + 0.42, f"{r+1}. {naslov}", fontsize=14, color=PL, va="bottom")
+        for k, c in enumerate(boje):
+            ax.add_patch(Ellipse((0.8 + k*1.75, y), 1.6, 0.62, fc=np.array(c)/255,
+                                 ec=(0.25, 0.25, 0.25), lw=0.8))
+    ax.set_xlim(-0.1, 10.65); ax.set_ylim(-0.5, 3.1); ax.set_aspect("equal"); ax.axis("off")
+    spremi(fig, "p02_hsv_nizovi.png")
+
+
+
+def hsv_kanali():
+    img = data.astronaut()
+    hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)          # OpenCV: H u rasponu 0-179
+    fig, ax = plt.subplots(1, 4, figsize=(13, 3.5))
+    prikazi(ax[0], img, "RGB")
+    ax[1].imshow(hsv[..., 0], cmap="hsv", vmin=0, vmax=179)
+    ax[1].set_xticks([]); ax[1].set_yticks([]); ax[1].set_title("H — ton", fontsize=13)
+    for sp in ax[1].spines.values():
+        sp.set_visible(False)
+    prikazi(ax[2], hsv[..., 1], "S — zasićenje")
+    prikazi(ax[3], hsv[..., 2], "V — vrijednost")
+    fig.tight_layout()
+    spremi(fig, "p02_hsv_kanali.jpg")
 
 
 # ---------------------------------------------------------------- RGB kocka
@@ -543,9 +627,61 @@ def rezidual():
     spremi(fig, "p02_rezidual.png")
 
 
+
+def nyquist_sinus():
+    # primjer sa starog slajda "Aliasing": crvena sinusoida (0,9 ciklusa po uzorku) uzorkovana
+    # u cijelim brojevima daje iste uzorke kao plava (0,1 ciklusa po uzorku)
+    x = np.linspace(-0.5, 10.5, 2000)
+    n = np.arange(0, 11)
+    visoka = lambda t: np.cos(2*np.pi*0.9*(t - 3))
+    niska = lambda t: np.cos(2*np.pi*0.1*(t - 3))
+    fig, ax = plt.subplots(figsize=(11, 3.2))
+    ax.plot(x, visoka(x), color=(0.85, 0.2, 0.2), lw=1.6, label="signal: 0,9 ciklusa po uzorku")
+    ax.plot(x, niska(x), color=PL, lw=2.2, label="alias: 0,1 ciklusa po uzorku")
+    ax.vlines(n, 0, niska(n), color=SI, lw=1)
+    ax.plot(n, niska(n), "o", color="black", ms=7, zorder=5, label="uzorci")
+    ax.axhline(0, color=SI, lw=0.8)
+    ax.set_xticks(n); ax.set_yticks([]); ax.set_xlim(-0.5, 10.5)
+    ax.set_xlabel("indeks uzorka")
+    for sp in ["top", "right", "left"]:
+        ax.spines[sp].set_visible(False)
+    ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, 1.22), ncol=3, fontsize=11)
+    spremi(fig, "p02_nyquist_sinus.png")
+
+
+
+def interpolacija():
+    # isti izrez (oko), uvećan 8 puta različitim metodama; sva četiri kompozita iste su
+    # veličine i rasporeda, pa se na uzastopnim slajdovima uvećanje nalazi na istom mjestu
+    from matplotlib.patches import ConnectionPatch
+    img = data.astronaut()
+    x0, y0, n, k = 226, 84, 32, 8
+    metode = [("najblizi", cv2.INTER_NEAREST), ("bilinearna", cv2.INTER_LINEAR),
+              ("bikubicna", cv2.INTER_CUBIC), ("lanczos", cv2.INTER_LANCZOS4)]
+    for ime, m in metode:
+        # interpolira se šire područje, pa se izrezuje -- izbjegavaju se rubni efekti
+        pad = 8
+        izrez = img[y0-pad:y0+n+pad, x0-pad:x0+n+pad]
+        vel = cv2.resize(izrez, None, fx=k, fy=k, interpolation=m)
+        vel = vel[pad*k:(pad+n)*k, pad*k:(pad+n)*k]
+        fig = plt.figure(figsize=(8, 5.6))
+        az = fig.add_axes([0.36, 0.0, 0.64, 1.0])
+        az.imshow(vel, interpolation="nearest"); az.set_xticks([]); az.set_yticks([])
+        ao = fig.add_axes([0.0, 0.0, 0.3, 0.43])
+        ao.imshow(img, interpolation="antialiased"); ao.set_xticks([]); ao.set_yticks([])
+        ao.add_patch(Rectangle((x0, y0), n, n, fill=False, ec=(0.1, 0.2, 0.9), lw=1.6))
+        for (xa, ya), (xb, yb) in [((x0 + n, y0), (0, 0)), ((x0 + n, y0 + n), (0, n*k - 1))]:
+            fig.add_artist(ConnectionPatch(xyA=(xa, ya), coordsA=ao.transData,
+                                           xyB=(xb, yb), coordsB=az.transData,
+                                           color=(0.1, 0.2, 0.9), lw=1.0))
+        spremi(fig, f"p02_interp_{ime}.png")
+
+
 if __name__ == "__main__":
-    for fn in [spektar, metamerizam, mijesanje, rgb_kocka, u_sivo, demozaik, uzorkovanje, matrica,
+    for fn in [spektar, metamerizam, metamerizam_zuta, mijesanje, rgb_kocka, u_sivo,
+               lambda: koja_boja(False, "p02_koja_boja.png"),
+               lambda: koja_boja(True, "p02_koja_boja_rgb.png"), hsv_nizovi, hsv_kanali, demozaik, uzorkovanje, matrica,
                kanali, rezolucija_dubina, float_vs_int, tockaste, razlika, histogram, histogram_rgb,
                permutacija, tipovi_histograma, rastezanje_ujednacavanje, log_exp, cesalj,
-               konvolucija_shema, filtri, korelacija, rezidual]:
+               konvolucija_shema, filtri, korelacija, rezidual, nyquist_sinus, interpolacija]:
         fn()
