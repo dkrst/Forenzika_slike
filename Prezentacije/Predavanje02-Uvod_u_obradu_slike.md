@@ -8,10 +8,27 @@ lang: hr
 
 # Kako vidimo
 
+## Svjetlost i vidljivi spektar
+
+:::::: {.columns align=top}
+::: {.column width="46%"}
+- Sunce emitira elektromagnetsko zračenje različitih **valnih duljina**
+- Oko je osjetljivo na vrlo mali dio spektra: približno **380--750 nm**
+- Valne duljine se različito **lome** --- odatle razlaganje u prizmi i duga
+
+\vspace{0.5ex}
+
+\includegraphics[width=0.74\linewidth]{slike/p02_em_spektar_valovi.jpg}
+:::
+::: {.column width="52%"}
+![](slike/p02_em_spektar_prizma.jpg){height=76%}
+:::
+::::::
+
 ## Svjetlost
 
-- Svjetlost je **elektromagnetsko zračenje** koje podražuje fotoreceptore oka
-- Ljudsko oko osjetljivo je na vrlo mali dio spektra: približno **380--750 nm**
+- Predmet dio valnih duljina **upija**, a dio **odbija** --- ovisno o materijalu i teksturi površine
+- U oko stiže **odbijena** svjetlost: nju vidimo i po njoj predmetu pripisujemo boju
 
 ![](slike/p02_spektar.png){width=100%}
 
@@ -42,6 +59,15 @@ $$I(\lambda) = \rho(\lambda) \, L(\lambda)$$
 \includegraphics[width=\linewidth]{slike/p02_hvs_model.jpg}
 :::
 ::::::
+
+## Fotoreceptori u ljudskom oku
+
+![](slike/p02_fotoreceptori_oko.jpg){width=94%}
+
+Mrežnica sadrži dvije vrste fotoreceptora:
+
+- **čunjići** (*cones*) --- odziv u uvjetima bolje osvijetljenosti
+- **štapići** (*rods*) --- odziv u uvjetima slabije osvijetljenosti
 
 ## Štapići i čunjići
 
@@ -100,6 +126,48 @@ Oko ne može rekonstruirati spektar: svjetlost svodi na \textbf{tri broja}. Fizi
 \begin{deklaracija}
 Različiti spektri mogu dati istu boju --- zato su za zapis i prikaz boje dovoljne tri vrijednosti po pikselu.
 \end{deklaracija}
+
+## Reprezentacija spektra primarnim RGB izvorima
+
+![](slike/p02_cie_rgb_krivulje.jpg){height=58%}
+
+- Za dio vidljivog dijela spektra neke od vrijednosti poticaja morale bi biti **negativne**
+
+## LMS model i reprezentacija boje u računalu
+
+- Postoji li drugi skup tri primarna izvora kojim bi bilo moguće opisati sve boje **bez negativnih** vrijednosti poticaja?
+
+\begin{deklaracija}
+Iako se za bilo koju boju može pronaći odgovarajući set tri primarna izvora, ne postoji takav set primarnih izvora kojim bi bilo moguće reproducirati sve boje!
+\end{deklaracija}
+
+**CIE XYZ sustav:**
+
+- Hipotetski primarni izvori (nisu fizikalno realizibilni)
+- Koordinate (komponente boje) XYZ sustava povezane su s RGB sustavom **linearnim transformacijama**
+- $Y$ koordinata predstavlja **svjetlinu**
+- Pogodan za kolorimetrijske kalkulacije
+
+## XYZ prostor boja
+
+\begin{center}
+\includegraphics[height=0.46\textheight]{slike/p02_cie_xyz_krivulje.jpg}
+
+\vspace{0.5ex}
+{\small\itshape vrijednosti poticaja za CIE XYZ sustav}
+\end{center}
+
+\vspace{-0.5ex}
+
+```{=latex}
+\small
+```
+
+$$X = 0{,}490\,R + 0{,}310\,G + 0{,}200\,B \qquad Y = 0{,}177\,R + 0{,}813\,G + 0{,}011\,B$$
+
+\vspace{-2ex}
+
+$$Z = 0{,}000\,R + 0{,}010\,G + 0{,}990\,B$$
 
 # Osnove boje
 
