@@ -127,6 +127,42 @@ Oko ne može rekonstruirati spektar: svjetlost svodi na \textbf{tri broja}. Fizi
 Različiti spektri mogu dati istu boju --- zato su za zapis i prikaz boje dovoljne tri vrijednosti po pikselu.
 \end{deklaracija}
 
+# Osnove boje
+
+## Miješanje boja
+
+- **Trikromatska teorija:** gotovo svaka boja može se dobiti miješanjem tri primarne boje
+
+![](slike/p02_mijesanje.png){height=44%}
+
+- **Aditivno** --- svjetla se zbrajaju (zasloni, projektori): RGB
+- **Suptraktivno** --- pigmenti upijaju svjetlost (tisak): CMY + crna (K)
+
+## RGB prostor boja
+
+:::::: columns
+::: {.column width="46%"}
+![](slike/p02_rgb_kocka.png){width=100%}
+:::
+::: {.column width="52%"}
+- Svaka boja je točka u kocki $(R, G, B)$
+- Crna je u ishodištu $(0,0,0)$, bijela u suprotnom vrhu $(1,1,1)$ --- na slici središnji vrh
+- Dijagonala $R = G = B$ su **sive razine**
+- Uz 8 bita po kanalu: $256^3 \approx 16{,}7$ milijuna boja
+:::
+::::::
+
+## Iz boje u sive razine
+
+![](slike/p02_u_sivo.jpg){width=62%}
+
+$$I = 0{,}299\,R + 0{,}587\,G + 0{,}114\,B$$
+
+- Jednostavni prosjek daje istu sivu za crvenu, zelenu i plavu
+- Težine prate osjetljivost oka --- najveću na zeleno (ITU-R BT.601, \texttt{cv2.cvtColor})
+
+# Prostori boja
+
 ## Reprezentacija spektra primarnim RGB izvorima
 
 ![](slike/p02_cie_rgb_krivulje.jpg){height=58%}
@@ -169,39 +205,116 @@ $$X = 0{,}490\,R + 0{,}310\,G + 0{,}200\,B \qquad Y = 0{,}177\,R + 0{,}813\,G + 
 
 $$Z = 0{,}000\,R + 0{,}010\,G + 0{,}990\,B$$
 
-# Osnove boje
+## Kromatske koordinate
 
-## Miješanje boja
+Za tri vrijednosti poticaja primarnih izvora $T_1(\lambda)$, $T_2(\lambda)$, $T_3(\lambda)$ definiramo:
 
-- **Trikromatska teorija:** gotovo svaka boja može se dobiti miješanjem tri primarne boje
+$$t_k = \frac{T_k}{T_1 + T_2 + T_3}, \qquad k = 1, 2, 3 \qquad\text{pri čemu je}\qquad t_1 + t_2 + t_3 = 1$$
 
-![](slike/p02_mijesanje.png){height=44%}
+- Samo su **dvije od tri** kromatske koordinate nezavisne
+- Kromatske koordinate projiciraju trodimenzionalnu boju na **dvodimenzionalnu ravninu**
+- Cijeli prostor zadan je koordinatama $(t_1, t_2, Y)$:
+    - $t_1, t_2$ --- kromatska komponenta boje
+    - $Y$ --- svjetlina
 
-- **Aditivno** --- svjetla se zbrajaju (zasloni, projektori): RGB
-- **Suptraktivno** --- pigmenti upijaju svjetlost (tisak): CMY + crna (K)
+## Dijagram kromatičnosti
 
-## RGB prostor boja
-
-:::::: columns
-::: {.column width="46%"}
-![](slike/p02_rgb_kocka.png){width=100%}
-:::
+:::::: {.columns align=top}
 ::: {.column width="52%"}
-- Svaka boja je točka u kocki $(R, G, B)$
-- Crna je u ishodištu $(0,0,0)$, bijela u suprotnom vrhu $(1,1,1)$ --- na slici središnji vrh
-- Dijagonala $R = G = B$ su **sive razine**
-- Uz 8 bita po kanalu: $256^3 \approx 16{,}7$ milijuna boja
+- Za bilo koju fiksnu vrijednost $Y$ = konstanta dobiva se **kromatska ravnina**
+- Pripadajući podprostor boja prikazan je **dijagramom kromatičnosti**
+- Dio spektra koji se može reproducirati (**gamut** sustava) omeđen je pravcima koji povezuju točke $(0,0)$, $(0,1)$ i $(1,0)$
+:::
+::: {.column width="46%"}
+![*rg* dijagram CIE RGB sustava](slike/p02_dijagram_rg.jpg){width=84%}
 :::
 ::::::
 
-## Iz boje u sive razine
+## CIE RGB i CIE XYZ
 
-![](slike/p02_u_sivo.jpg){width=62%}
+\begin{center}
+\parbox[t]{0.31\textwidth}{\centering\includegraphics[width=\linewidth]{slike/p02_dijagram_rg.jpg}\\[0.2ex]{\scriptsize CIE RGB (\textit{rg})}}\hspace{0.015\textwidth}%
+\parbox[t]{0.31\textwidth}{\centering\includegraphics[width=\linewidth]{slike/p02_gamut_rgb_xyz.jpg}\\[0.2ex]{\scriptsize gamut CIE RGB unutar CIE XYZ}}\hspace{0.015\textwidth}%
+\parbox[t]{0.31\textwidth}{\centering\includegraphics[width=\linewidth]{slike/p02_dijagram_xy.jpg}\\[0.2ex]{\scriptsize CIE XYZ (\textit{xy})}}
+\end{center}
 
-$$I = 0{,}299\,R + 0{,}587\,G + 0{,}114\,B$$
+- Gamut CIE RGB sustava pokriva samo dio prostora boja koje čovjek vidi
 
-- Jednostavni prosjek daje istu sivu za crvenu, zelenu i plavu
-- Težine prate osjetljivost oka --- najveću na zeleno (ITU-R BT.601, \texttt{cv2.cvtColor})
+## Udaljenosti u prostoru boja
+
+:::::: {.columns align=top}
+::: {.column width="56%"}
+```{=latex}
+\small
+```
+
+**Na koji način određujemo sličnost boja?**
+
+- Međusobna udaljenost koordinata dviju proizvoljno odabranih boja jedina je dostupna **kvantitativna mjera** sličnosti
+- **Perceptualna uniformnost:** odgovara li perceptualno poimanje razlike između dviju boja njihovoj udaljenosti u promatranom prostoru --- i to u **svim** dijelovima prostora?
+:::
+::: {.column width="42%"}
+![](slike/p02_dijagram_rg.jpg){width=88%}
+:::
+::::::
+
+\begin{deklaracija}
+Temeljni uvjet za bilo kakvu obradu računalom.
+\end{deklaracija}
+
+## MacAdamove elipse
+
+:::::: {.columns align=top}
+::: {.column width="50%"}
+- Elipse na dijagramu kromatičnosti unutar kojih prosječno ljudsko oko **ne vidi razliku** boja
+    - boja na rubu elipse neprimjetno se razlikuje od boje u središtu
+- U CIE XYZ sustavu veličina, orijentacija i ekscentricitet elipsa **variraju** ovisno o položaju u prostoru
+- XYZ je ipak znatno poboljšanje u odnosu na RGB
+:::
+::: {.column width="48%"}
+![MacAdamove elipse za CIE XYZ sustav](slike/p02_macadam.jpg){width=74%}
+:::
+::::::
+
+## Objektivni prostori boja
+
+- Prostori boja kod kojih perceptualna razlika između dviju boja **približno odgovara** njihovoj udaljenosti u tom prostoru
+- **CIE LAB**, **CIE LUV**:
+    - približno perceptualno uniformni
+    - povezani s CIE XYZ prostorom **nelinearnim** transformacijama
+
+\begin{deklaracija}
+Ne postoji prostor boja u kojem je pretpostavka perceptualne uniformnosti u potpunosti zadovoljena --- jednaka udaljenost u različitim dijelovima prostora ne znači i jednaku percepciju razlike boja.
+\end{deklaracija}
+
+## CIE LUV i CIE LAB
+
+\begin{center}
+\parbox[t]{0.23\textwidth}{\centering\includegraphics[width=\linewidth]{slike/p02_luv_dijagram.jpg}}\hspace{0.01\textwidth}%
+\parbox[t]{0.23\textwidth}{\centering\includegraphics[width=\linewidth]{slike/p02_luv_3d.jpg}}\hspace{0.03\textwidth}%
+\parbox[t]{0.23\textwidth}{\centering\includegraphics[width=\linewidth]{slike/p02_lab_dijagram.jpg}}\hspace{0.01\textwidth}%
+\parbox[t]{0.23\textwidth}{\centering\includegraphics[width=\linewidth]{slike/p02_lab_3d.jpg}}
+
+\vspace{0.4ex}
+\parbox{0.47\textwidth}{\centering\small\itshape CIE LUV}\hspace{0.03\textwidth}%
+\parbox{0.47\textwidth}{\centering\small\itshape CIE LAB}
+\end{center}
+
+- Oba prostora odvajaju **svjetlinu** ($L^*$) od dviju kromatskih komponenti
+
+# Percepcija boje
+
+## {.plain}
+
+```{=latex}
+\vfill
+\begin{center}
+\begin{minipage}{0.78\textwidth}
+\centering\Large\color{fesbPlava} {Odgovara li reprezentacija boje kroz kombinaciju tri primarna izvora načinu kako percipiramo boju u višim razinama svijesti?}
+\end{minipage}
+\end{center}
+\vfill
+```
 
 ## Koja boja ima najviše crvene, zelene ili plave?
 
