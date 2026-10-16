@@ -249,6 +249,58 @@ def krom_poduzorkovanje():
     spremi(fig, "p03_krom_poduzorkovanje.png")
 
 
+def krom_poduzorkovanje_foto():
+    """Isto poduzorkovanje prikazano na fotografiji: svjetlina nosi sav detalj,
+    kromatske komponente su i bez poduzorkovanja glatke."""
+    izr = SLIKA[150:250, 170:320]                      # rub salice: bijelo / crveno / crema
+    ycc = cv2.cvtColor(izr, cv2.COLOR_RGB2YCrCb).astype(np.float32)
+    Y, Cr, Cb = ycc[:, :, 0], ycc[:, :, 1], ycc[:, :, 2]
+    h, w = Y.shape
+
+    def spoji(Yk, Cbk, Crk):
+        z = np.stack([Yk, Crk, Cbk], -1).clip(0, 255).astype(np.uint8)
+        return cv2.cvtColor(z, cv2.COLOR_YCrCb2RGB)
+
+    def samo_boja(Cbk, Crk):                            # Y fiksiran, vidi se samo kroma
+        return spoji(np.full_like(Y, 128), Cbk, Crk)
+
+    def pola(c):                                        # jedan uzorak na kvadrat 2 x 2
+        return cv2.resize(c, (w // 2, h // 2), interpolation=cv2.INTER_AREA)
+
+    def natrag(c):                                      # vracanje na punu rezoluciju
+        return cv2.resize(c, (w, h), interpolation=cv2.INTER_NEAREST)
+
+    vel = lambda a: cv2.resize(a, (450, 300), interpolation=cv2.INTER_NEAREST)
+    Cbm, Crm = pola(Cb), pola(Cr)                       # stvarno zapisani uzorci
+    Cb2, Cr2 = natrag(Cbm), natrag(Crm)                 # ono sto dekoder rekonstruira
+
+    # kroma 4:2:0 prikazana u stvarnim dimenzijama (pola sirine i visine)
+    mala = np.stack([np.full_like(Cbm, 128), Crm, Cbm], -1).clip(0, 255).astype(np.uint8)
+    mala = cv2.cvtColor(mala, cv2.COLOR_YCrCb2RGB)
+
+    Yu = Y.astype(np.uint8)
+    fig, ax = plt.subplots(2, 3, figsize=(13.2, 6.0))
+    prikazi(ax[0, 0], vel(izr), "izvornik")
+    prikazi(ax[0, 1], vel(Yu), "svjetlina Y")
+    prikazi(ax[0, 2], vel(samo_boja(Cb, Cr)), f"boja Cb, Cr — 4:4:4   ({w} × {h})")
+    prikazi(ax[1, 0], vel(spoji(Y, Cb2, Cr2)), "rezultat uz 4:2:0")
+    prikazi(ax[1, 1], vel(Yu), "svjetlina Y — ista")
+
+    a = ax[1, 2]
+    a.imshow(mala, extent=(0, 225, 150, 0), interpolation="nearest")
+    a.add_patch(Rectangle((0, 0), 450, 300, fill=False, ec=SI, lw=1.0, ls=(0, (4, 3))))
+    a.add_patch(Rectangle((0, 0), 225, 150, fill=False, ec=SI, lw=1.0))
+    a.set_title(f"boja Cb, Cr — 4:2:0   ({w//2} × {h//2})", fontsize=12)
+    a.text(340, 232, "četvrtina broja\nuzoraka u odnosu\nna svjetlinu", ha="center",
+           va="center", fontsize=11, color=SI, linespacing=1.6)
+    a.set_xlim(0, 450); a.set_ylim(300, 0)
+
+    for a in ax.ravel():
+        a.axis("off")
+    fig.tight_layout()
+    spremi(fig, "p03_krom_poduzorkovanje_foto.png")
+
+
 # ---------------------------------------------------------------- JPEG blokovi 8x8
 def jpeg_blokovi():
     y, x, h, w = 120, 150, 64, 64
@@ -571,9 +623,76 @@ def tiff_lzw():
     spremi(fig, "p03_tiff_lzw.png")
 
 
+# ---------------------------------------------------------------- JPEG: lanac koraka
+def jpeg_lanac():
+    """Koraci JPEG sazimanja, okomiti lanac; narancasto su koraci u kojima se
+    informacija trajno gubi. Obnova slajda 24 stare prezentacije L2-Matematicki_model."""
+    fig, ax = plt.subplots(figsize=(13.0, 6.2))
+
+    koraci = [
+        ("RGB → YCbCr", "svjetlina se odvaja od dviju kromatskih komponenti", False),
+        ("poduzorkovanje Cb, Cr", "boja se zapisuje u manjoj razlučivosti (najčešće 4:2:0)", True),
+        ("blokovi 8 × 8", "slika se dijeli na polja piksela;  raspon [0,255] → [−128,127]", False),
+        ("DCT", "iz prostorne u frekvencijsku domenu,  $f(x,y) → F(u,v)$", False),
+        ("kvantizacija", "koeficijenti se dijele kvantizacijskom tablicom i zaokružuju", True),
+        ("zig-zag, RLE, Huffman", "entropijsko kodiranje, bez gubitka", False),
+        ("zaglavlje + podaci", "markeri, kvantizacijske tablice, EXIF", False),
+    ]
+
+    bx, bw = 4.75, 3.25
+    bh, gap = 0.62, 0.20
+    y = 6.05
+    for naslov, opis, gubitak in koraci:
+        y -= bh
+        fc = (1.0, 0.93, 0.80) if gubitak else (0.93, 0.91, 0.97)
+        ec = NG if gubitak else SI
+        ax.add_patch(FancyBboxPatch((bx, y), bw, bh, boxstyle="round,pad=0.02,rounding_size=0.06",
+                                    fc=fc, ec=ec, lw=1.5 if gubitak else 1.2))
+        ax.text(bx + bw / 2, y + bh / 2, naslov, ha="center", va="center", fontsize=11.5,
+                weight="bold", color=PL)
+        ax.text(bx + bw + 0.30, y + bh / 2, opis, ha="left", va="center", fontsize=10,
+                color="black", linespacing=1.5)
+        if koraci.index((naslov, opis, gubitak)) < len(koraci) - 1:
+            ax.add_patch(FancyArrowPatch((bx + bw / 2, y - 0.02), (bx + bw / 2, y - gap + 0.02),
+                                         arrowstyle="-|>", mutation_scale=13, color=SI, lw=1.4))
+        y -= gap
+
+    # umanjena fotografija s mrezom blokova 8 x 8
+    img = cv2.resize(SLIKA, (240, 160), interpolation=cv2.INTER_AREA)
+    ix0, ix1, iy0, iy1 = 0.45, 2.55, 4.62, 6.02
+    ax.imshow(img, extent=(ix0, ix1, iy0, iy1), aspect="auto", zorder=2)
+    for k in range(16):
+        gx = ix0 + k * (ix1 - ix0) / 15
+        ax.plot([gx, gx], [iy0, iy1], color="white", lw=0.45, alpha=0.75, zorder=3)
+    for k in range(11):
+        gy = iy0 + k * (iy1 - iy0) / 10
+        ax.plot([ix0, ix1], [gy, gy], color="white", lw=0.45, alpha=0.75, zorder=3)
+    ax.add_patch(Rectangle((ix0, iy0), ix1 - ix0, iy1 - iy0, fill=False, ec=SI, lw=1.1, zorder=4))
+    ax.text((ix0 + ix1) / 2, iy0 - 0.14, "svaki blok obrađuje se neovisno", ha="center", va="top",
+            fontsize=9.5, style="italic", color=SI)
+
+    # legenda
+    ax.add_patch(FancyBboxPatch((0.45, 3.52), 0.30, 0.30, boxstyle="round,pad=0.01,rounding_size=0.04",
+                                fc=(1.0, 0.93, 0.80), ec=NG, lw=1.4))
+    ax.text(0.92, 3.67, "informacija se\ntrajno gubi", ha="left", va="center",
+            fontsize=10, color="black", linespacing=1.4)
+    ax.add_patch(FancyBboxPatch((0.45, 2.88), 0.30, 0.30, boxstyle="round,pad=0.01,rounding_size=0.04",
+                                fc=(0.93, 0.91, 0.97), ec=SI, lw=1.2))
+    ax.text(0.92, 3.03, "bez gubitka", ha="left", va="center", fontsize=10, color="black")
+
+    # zakljucak
+    ax.add_patch(FancyBboxPatch((0.45, 1.05), 3.75, 1.30, boxstyle="round,pad=0.02,rounding_size=0.06",
+                                fc=(0.90, 0.93, 0.90), ec=SI, lw=1.2))
+    ax.text(2.32, 1.70, "Datoteka se tipično smanji\nna desetak posto izvorne\nveličine, uz gubitak koji\noko jedva primjećuje.",
+            ha="center", va="center", fontsize=10.5, color=PL, linespacing=1.6)
+
+    ax.set_xlim(0, 13.0); ax.set_ylim(0.28, 6.15); ax.axis("off")
+    spremi(fig, "p03_jpeg_lanac.png")
+
+
 if __name__ == "__main__":
     for fn in [struktura_datoteke, podjela_formata, velicine, rle_huffman, png_filtri,
-               gif_paleta, jpeg_kvalitete, krom_poduzorkovanje, jpeg_blokovi,
+               gif_paleta, jpeg_kvalitete, krom_poduzorkovanje, krom_poduzorkovanje_foto, jpeg_blokovi,
                kvant_tablice, raw_razvijanje, thumbnail_trag, matrica_rgb, bmp_hex, bmp_slicica,
-               tiff_struktura, tiff_lzw]:
+               tiff_struktura, tiff_lzw, jpeg_lanac]:
         fn()

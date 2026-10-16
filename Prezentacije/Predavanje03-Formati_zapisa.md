@@ -463,7 +463,7 @@ Za arhivu se u pravilu bira bez sažimanja ili ZIP; JPEG unutar TIFF-a poništav
 
 # Sažimanje s gubitkom
 
-## JPEG --- osnovna ideja
+## JPEG
 
 - **JPEG** (*Joint Photographic Experts Group*, 1992.) --- najčešći format za fotografije
 - Polazište: oko je osjetljivije na **svjetlinu** nego na boju, i slabo opaža **fine promjene**
@@ -475,12 +475,20 @@ Za arhivu se u pravilu bira bez sažimanja ili ZIP; JPEG unutar TIFF-a poništav
     5. **kvantizacija** --- ovdje se gubi informacija
     6. zig-zag poredak, RLE i Huffmanovo kodiranje
 
+## Koraci JPEG sažimanja
+
+![](slike/p03_jpeg_lanac.png){width=100%}
+
 ## Poduzorkovanje kroma
 
 ![](slike/p03_krom_poduzorkovanje.png){width=88%}
 
 - **4:4:4** --- puna kromatska rezolucija; **4:2:0** --- kroma na četvrtini broja uzoraka
 - Svjetlina ostaje netaknuta, pa je gubitak na fotografiji teško primijetiti
+
+## Poduzorkovanje kroma
+
+![](slike/p03_krom_poduzorkovanje_foto.png){height=78%}
 
 ## Kvantizacija i stupanj kvalitete
 
@@ -511,10 +519,12 @@ Za arhivu se u pravilu bira bez sažimanja ili ZIP; JPEG unutar TIFF-a poništav
 
 ## JPEG, JFIF i EXIF
 
-- **JPEG** --- način sažimanja podataka
-    - ne propisuje kako se slika zapisuje u datoteku
-- **JFIF** (*JPEG File Interchange Format*) --- dogovara sve što JPEG nije: gustoću piksela, prostor boja, raspored podataka
-- **EXIF** (*Exchangeable Image File Format*) --- metapodaci o snimanju, zapisani u TIFF strukturi tagova
+- **JPEG** --- definira **način sažimanja** podataka
+    - dopušta različite prostore boja i različit stupanj sažimanja po kanalu
+    - ne propisuje kako se u datoteku zapisuje sve što je potrebno za obnavljanje slike
+- **JFIF** (*JPEG File Interchange Format*) --- definira **sve detalje za pohranu i prijenos** slike koje JPEG nije specificirao: prostor boja (YCbCr), gustoću piksela, raspored podataka
+- **EXIF** (*Exchangeable Image File Format*) --- noviji, **nije kompatibilan** s JFIF-om
+    - metapodaci u tagovima, po uzoru na TIFF; proizvođač smije dodati vlastite (postavke kamere, geolokacija)
 
 \vspace{1ex}
 
@@ -556,7 +566,7 @@ GPSLatitude       43° 30' 50.83" N
 GPSLongitude      16° 26' 31.22" E
 ```
 
-- Uz to: orijentacija, balans bijele, bljeskalica, serijski broj uređaja, **ugrađena sličica**
+- Uz to: orijentacija, balans bijele, bljeskalica, serijski broj uređaja, **ugrađena sličica** (*thumbnail*)
 
 ## Što EXIF odaje
 
@@ -570,7 +580,7 @@ GPSLongitude      16° 26' 31.22" E
 Metapodaci se lako mijenjaju i brišu, pa njihova vjerodostojnost nije veća od vjerodostojnosti same slike. Njihovo \textbf{odsustvo} također je podatak.
 \end{deklaracija}
 
-## Ugrađena sličica
+## Ugrađena sličica (*thumbnail*)
 
 ![](slike/p03_thumbnail.jpg){width=100%}
 
@@ -600,9 +610,9 @@ Metapodaci se lako mijenjaju i brišu, pa njihova vjerodostojnost nije veća od 
 
 - **Potpis i struktura datoteke** --- je li datoteka ono što tvrdi da jest
 - **Kvantizacijske tablice** --- potpis uređaja ili programa koji je sliku spremio
-- **Redoslijed segmenata i tagova** --- različiti programi pišu različito
+- **Redoslijed segmenata i tagova** --- različiti programi i uređaji pišu različito
 - **Metapodaci** --- uređaj, vrijeme, mjesto, tragovi obrade
-- **Ugrađena sličica** --- može sadržavati raniju verziju slike
+- **Ugrađena sličica** (*thumbnail*) --- može sadržavati raniju verziju slike
 
 \vspace{1ex}
 
