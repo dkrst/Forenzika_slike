@@ -8,7 +8,7 @@ Prezentacije kolegija *Forenzička analiza digitalne slike* (FESB).
 |---|---|---|---|
 | 1 | Uvod u forenziku digitalne slike | [md](Predavanje01-Uvod.md) | [pdf](Predavanje01-Uvod.pdf) |
 | 2 | Uvod u digitalnu obradu i analizu slike | [md](Predavanje02-Uvod_u_obradu_slike.md) | [pdf](Predavanje02-Uvod_u_obradu_slike.pdf) |
-| 3 | Matematički model slike | — | — |
+| 3 | Formati zapisa digitalne slike | [md](Predavanje03-Formati_zapisa.md) | [pdf](Predavanje03-Formati_zapisa.pdf) |
 
 ## Struktura
 
