@@ -10,17 +10,23 @@ lang: hr
 
 ## Od scene do datoteke
 
-- Prošla predavanja: kako svjetlost postaje matrica brojeva
-    - senzor → CFA → demozaikiranje → balans bijele → gama → **zapis u datoteku**
-- Slika u memoriji je matrica $f(m, n)$:
-    - **dimenzije** --- broj redaka i stupaca
-    - **dubina** --- broj bita po komponenti (najčešće 8)
-    - **prostor boja** --- RGB, sive razine, CMYK
+- Kako svjetlost postaje matrica brojeva:
 
-\vspace{1ex}
+\begin{center}
+\small
+objektiv → CFA → senzor → \textbf{sirovi podaci} → demozaikiranje → balans bijele → gama → \textbf{zapis u datoteku}
+\end{center}
+
+![](slike/cjevovod_kamere.jpg){width=62%}
+
+## Matrični zapis digitalne slike
+
+![](slike/p03_matrica_rgb.jpg){width=64%}
+
+- **dimenzije**, **dubina** (bita po komponenti, najčešće 8) i **prostor boja** (RGB, sive razine, CMYK)
 
 \begin{deklaracija}
-Datoteka mora sadržavati sve to --- i same vrijednosti piksela, i podatke bez kojih se te vrijednosti ne mogu protumačiti.
+Datoteka mora sadržavati i vrijednosti piksela i podatke bez kojih se one ne mogu protumačiti.
 \end{deklaracija}
 
 ## Koliko je to podataka?
@@ -35,16 +41,29 @@ $$600 \times 400 \times 3 = 720\,000 \text{ bajtova} \approx 703 \text{ kB}$$
 \vspace{1ex}
 
 - Memorijska kartica od 64 GB primila bi oko 900 takvih nekomprimiranih fotografija
-- **Sažimanje nije luksuz nego nužnost**
+- **Sažimanje nije opcija nego nužnost**
 
 # Slikovna datoteka
 
 ## Što datoteka sadrži
 
-![](slike/p03_struktura_datoteke.png){width=100%}
+```{=latex}
+\begin{columns}[T]
+\begin{column}{0.50\textwidth}
+```
 
 - Raspored i naziv dijelova ovise o formatu, ali sadržaj je uvijek sličan
 - Bez zaglavlja niz bajtova nema značenje: isti podaci mogu biti slika $600 \times 400$ ili $400 \times 600$
+
+```{=latex}
+\end{column}
+\begin{column}{0.48\textwidth}
+\vspace{-1.06cm}
+\centering
+\includegraphics[height=0.95\textheight]{slike/p03_struktura_datoteke.png}
+\end{column}
+\end{columns}
+```
 
 ## Potpis datoteke
 
@@ -90,11 +109,111 @@ big-endian:      00 00 00 5A
 - TIFF (a time i EXIF) podržava **oba**, pa prva dva bajta kazuju koji je u uporabi
 - Pogrešna pretpostavka o poretku daje besmislene vrijednosti pri čitanju
 
-# Podjela formata
-
-## Tri skupine
+## Formati zapisa digitalne slike
 
 ![](slike/p03_podjela_formata.png){width=94%}
+
+
+## Što je RAW
+
+- **Izravno očitanje senzora**, bez obrade i bez sažimanja s gubitkom
+- Još uvijek **CFA mozaik** --- jedna vrijednost po pikselu, ne tri
+- Dubina 12--16 bita po pikselu, linearni odziv
+- Uz podatke senzora zapisuju se postavke snimanja i puni metapodaci
+- Datoteka nije spremna za prikaz --- fotografiju treba **razviti**
+
+\vspace{1ex}
+
+\begin{deklaracija}
+Često se naziva \textbf{digitalnim negativom}, po analogiji s klasičnom fotografijom.
+\end{deklaracija}
+
+## Razvijanje
+
+![](slike/p03_raw_razvijanje.jpg){width=100%}
+
+- Iste odluke --- balans bijele, ekspozicija, kontrast, zasićenje, izoštravanje, uklanjanje šuma --- donose se:
+    - **u kameri**, automatski, pri spremanju JPEG-a, ili
+    - **na računalu**, gdje ih ručno bira onaj tko razvija
+- Isti RAW može dati vrlo različite fotografije --- bez ikakve izmjene izvornih podataka
+
+## Formati i ograničenja
+
+- Format ovisi o proizvođaču i često o modelu:
+    - **CR2, CR3** (Canon), **NEF** (Nikon), **ARW** (Sony), **RAF** (Fuji), **ORF** (Olympus)
+- **DNG** (Adobe) --- pokušaj otvorenog standarda
+- Datoteke su velike, a podrška starijih programa neujednačena
+
+\vspace{1ex}
+
+\begin{deklaracija}
+RAW je najbliži onome što je senzor zabilježio, ali ni on sam po sebi ne dokazuje autentičnost: i RAW datoteka može se izmijeniti ili generirati.
+\end{deklaracija}
+
+## Kontroverze oko RAW formata
+
+Dvije suprotne odluke iz istog mjeseca --- **studenoga 2015.**
+
+:::::: columns
+::: {.column width="48%"}
+```{=latex}
+\small
+```
+
+**World Press Photo** --- *traži RAW*
+
+- Najugledniji natječaj novinske fotografije (Amsterdam, od 1955.)
+- Uži izbor: autori dostavljaju RAW ili neobrađeni JPEG iz kamere
+- uz niz od sedam snimaka: tri prije, prijavljena, tri poslije
+- dva analitičara uspoređuju izvornik s prijavom
+- Povod: te godine odbačeno oko 20 % takvih fotografija
+:::
+::: {.column width="48%"}
+```{=latex}
+\small
+```
+
+**Reuters** --- *zabranjuje RAW*
+
+- Ne primaju se fotografije razvijene iz RAW-a
+- Traži se JPEG izravno iz kamere; dopušteno je samo izrezivanje kadra i blaga korekcija tonova
+- Razlozi: brzina isporuke i načelo da slika mora odražavati stvarnost
+:::
+::::::
+
+\begin{deklaracija}
+Za \textbf{provjeru} je koristan izvornik, a za \textbf{brzu isporuku} datoteka koju je obradila kamera.
+\end{deklaracija}
+
+## Kontroverze oko RAW formata
+
+- Prigovori Reutersovoj odluci:
+    - JPEG iz kamere **već je obrađen** --- samo su odluke donesene u uređaju, a ne na računalu
+    - i JPEG se može neprimjetno izmijeniti; provjera traži forenzičku analizu
+    - RAW je teže izmijeniti, a da to ne ostavi trag --- pa je za utvrđivanje autentičnosti **koristniji**
+- Pravila World Press Photo vrijede i danas, u istom obliku
+- Reuters svoju odluku nije javno povukao
+
+\vspace{1ex}
+
+\begin{deklaracija}
+Format sam po sebi ne jamči vjerodostojnost. Ono što pomaže je \textbf{usporedba} s izvornom datotekom i s okolnim snimkama.
+\end{deklaracija}
+
+## Zašto je RAW teže izmijeniti?
+
+Izmjena mora biti dosljedna na nekoliko razina odjednom:
+
+- **CFA mozaik** --- RAW nije slika u boji; umetnuti sadržaj mora poštovati raspored filtara, inače ga demozaikiranje pretvori u lažne boje
+- **Linearni odziv** --- 12--16 bita, bez gama kodiranja; umetnuti dio mora imati fizikalno ispravan odnos svjetline
+- **Šum senzora** --- sirov, bez uklanjanja šuma i sažimanja; otisak senzora osjetljiv je i na male zahvate
+- **Alati** --- većina programa RAW samo čita; pisanje traži poznavanje vlasničkog formata pojedinog modela
+
+\vspace{0.5ex}
+
+\begin{deklaracija}
+Teže --- ali ne i nemoguće: formati su reverznim inženjerstvom razjašnjeni (\texttt{dcraw}, LibRaw), DNG je otvoren, a kriptografski potpisi u kameri probijeni su 2010. (Canon) i 2011. (Nikon), izvlačenjem privatnog ključa iz samog uređaja.
+\end{deklaracija}
 
 # Formati bez sažimanja
 
@@ -115,32 +234,49 @@ Veličina datoteke: $54 + \text{visina} \times \lceil 3 \cdot \text{širina} / 4
 
 ## BMP --- primjer
 
+```{=latex}
+\begin{tikzpicture}[remember picture, overlay]
+  \node[anchor=north east] at ($(current page.north east)+(-0.75cm,-0.25cm)$)
+    {\includegraphics[height=1.9cm]{slike/p03_bmp_slicica.png}};
+\end{tikzpicture}
+```
+
+```{=latex}
+\vspace{-0.45cm}
+```
+
 Slika $3 \times 2$ piksela, datoteka ima **78 bajtova**:
 
-```
-0000  42 4D 4E 00 00 00 00 00 00 00 36 00    zaglavlje
-000C  00 00 28 00 00 00 03 00 00 00 02 00    zaglavlje
-0018  00 00 01 00 18 00 00 00 00 00 18 00    zaglavlje
-0024  00 00 C4 0E 00 00 C4 0E 00 00 00 00    zaglavlje
-0030  00 00 00 00 00 00 00 FF 00 00 00 00    pikseli
-003C  00 FF FF 00 00 00 00 00 FF FF FF FF    pikseli
-0048  FF 00 00 00 00 00                      pikseli
+```{=latex}
+\vspace{0.4ex}
+\hspace*{-0.35cm}\includegraphics[width=0.72\textwidth]{slike/p03_bmp_hex.png}
+\vspace{0.6ex}
 ```
 
-- `42 4D` = `BM`; `4E 00 00 00` = 78 (veličina); `36 00 00 00` = 54 (odmak do piksela)
-- `03 00 00 00` = širina 3, `02 00 00 00` = visina 2, `18 00` = 24 bita po pikselu
+- Iz zaglavlja: `42 4D` = `BM`, veličina 78 B, odmak 54, širina 3, visina 2, 24 bita
+- Tri bajta po pikselu (**B, G, R**); točkasto su označeni bajtovi dopune
 
 ## BMP --- čitanje piksela
 
 Redak zauzima $3 \times 3 = 9$ B podataka, dopunjeno do 12 B:
 
-```
-redak zapisan prvi:  00 FF 00 | 00 00 00 | 00 FF FF | 00 00 00
-                       zelena     crna      žuta      dopuna
-
-redak zapisan drugi: 00 00 FF | FF FF FF | FF 00 00 | 00 00 00
-                      crvena    bijela     plava      dopuna
-```
+\begin{center}
+\setlength{\tabcolsep}{5pt}\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{r c c c c}
+\small redak zapisan prvi:
+ & \colorbox[RGB]{0,255,0}{\texttt{00 FF 00}}
+ & \colorbox[RGB]{0,0,0}{\textcolor{white}{\texttt{00 00 00}}}
+ & \colorbox[RGB]{255,255,0}{\texttt{00 FF FF}}
+ & \fcolorbox[RGB]{150,150,150}{247,247,247}{\textcolor{fesbSiva}{\texttt{00 00 00}}} \\
+ & {\scriptsize zelena} & {\scriptsize crna} & {\scriptsize žuta} & {\scriptsize dopuna} \\[1.2ex]
+\small redak zapisan drugi:
+ & \colorbox[RGB]{255,0,0}{\textcolor{white}{\texttt{00 00 FF}}}
+ & \fcolorbox[RGB]{150,150,150}{255,255,255}{\texttt{FF FF FF}}
+ & \colorbox[RGB]{0,0,255}{\textcolor{white}{\texttt{FF 00 00}}}
+ & \fcolorbox[RGB]{150,150,150}{247,247,247}{\textcolor{fesbSiva}{\texttt{00 00 00}}} \\
+ & {\scriptsize crvena} & {\scriptsize bijela} & {\scriptsize plava} & {\scriptsize dopuna} \\
+\end{tabular}
+\end{center}
 
 - Prvi zapisani redak je **donji** redak slike
 - `00 00 FF` je crvena, a ne plava --- poredak je B, G, R
@@ -183,9 +319,50 @@ redak zapisan drugi: 00 00 FF | FF FF FF | FF 00 00 | 00 00 00
 Sažimanje \textbf{bez gubitka} uklanja samo prvu i drugu vrstu. Sažimanje \textbf{s gubitkom} dira i treću --- i zato je nepovratno.
 \end{deklaracija}
 
-## RLE i Huffman
+## RLE --- kodiranje duljine niza
 
-![](slike/p03_rle_huffman.png){width=100%}
+Niz uzastopnih jednakih vrijednosti zamjenjuje se parom: **koliko puta** i **koja vrijednost**.
+
+![](slike/p03_rle.png){width=56%}
+
+- Učinkovit na jednolikim površinama; na fotografiji su susjedni pikseli rijetko posve jednaki, pa datoteku zna i povećati
+- **Koristi se:** BMP (RLE4, RLE8), TIFF (PackBits), faksimil; u JPEG-u za nizove nula
+
+## Huffmanovo kodiranje
+
+:::::: {.columns align=top}
+::: {.column width="52%"}
+Riječ `LILIHIP`: 7 znakova, 4 različita
+
+- 8 bita po znaku (ASCII): $7 \times 8 = 56$ bita
+- 2 bita po znaku (dovoljno za 4 znaka): $7 \times 2 = 14$ bita
+
+\vspace{0.5ex}
+
+Umjesto jednake duljine za sve, **češći znak dobiva kraći kôd**.
+:::
+::: {.column width="46%"}
+\begin{center}
+\setlength{\tabcolsep}{7pt}\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{c c l}
+\small znak & \small pojava & \small kôd \\[0.2ex]
+\hline\\[-2.2ex]
+\texttt{I} & 3 & \texttt{0} \\
+\texttt{L} & 2 & \texttt{11} \\
+\texttt{H} & 1 & \texttt{100} \\
+\texttt{P} & 1 & \texttt{101} \\
+\end{tabular}
+\end{center}
+:::
+::::::
+
+```{=latex}
+\begin{center}
+\texttt{L I L I H I P} $\;\rightarrow\;$ \texttt{11\,0\,11\,0\,100\,0\,101} $\;=\;$ \textbf{13 bita}
+\end{center}
+```
+
+- **Koristi se:** JPEG (entropijsko kodiranje), PNG i ZIP (dio algoritma DEFLATE)
 
 ## Koliko se može sažeti?
 
@@ -196,7 +373,7 @@ Sažimanje \textbf{bez gubitka} uklanja samo prvu i drugu vrstu. Sažimanje \tex
 \vspace{1ex}
 
 \begin{deklaracija}
-Fotografija je šumovita i gotovo nikad nema dugih nizova jednakih piksela, pa na njoj RLE i slični postupci slabo pomažu --- ponekad datoteku i povećaju.
+Fotografija sadrži šum i gotovo nikad nema dugih nizova jednakih piksela, pa na njoj RLE i slični postupci slabo pomažu --- ponekad datoteku i povećaju. Nakon kvantizacije u JPEG-u, međutim, nastaju dugi nizovi nula, pa ondje RLE daje vrlo dobar rezultat.
 \end{deklaracija}
 
 # Sažimanje bez gubitka
@@ -210,6 +387,21 @@ Fotografija je šumovita i gotovo nikad nema dugih nizova jednakih piksela, pa n
     - koristi ga PNG, kao i `zip` i `gzip`
 - Oba su **opći** postupci nad nizom bajtova; ne znaju ništa o slici
 
+## GIF --- ograničena paleta
+
+![](slike/p03_gif_paleta.jpg){width=100%}
+
+::::::: {.columns align=top}
+:::: {.column width="62%"}
+- Najviše **256 boja** iz vlastite palete zapisane u datoteci
+- Stepeničasti prijelazi ublažavaju se **ditheringom**: miješanjem raspoloživih boja u sitan uzorak
+- Podržava prozirnost (jedna boja palete) i jednostavnu animaciju
+::::
+:::: {.column width="36%"}
+![](slike/p03_dither.jpg){width=100%}
+::::
+:::::::
+
 ## PNG --- filtriranje prije sažimanja
 
 ![](slike/p03_png_filtri.png){width=100%}
@@ -218,27 +410,52 @@ Fotografija je šumovita i gotovo nikad nema dugih nizova jednakih piksela, pa n
 - Pet filtara: `None`, `Sub`, `Up`, `Average`, `Paeth`; bira se za svaki redak posebno
 - Razlike su gusto nagomilane oko nule --- takav niz DEFLATE sažima znatno bolje
 
-## GIF --- ograničena paleta
-
-![](slike/p03_gif_paleta.jpg){width=100%}
-
-- Najviše **256 boja** iz vlastite palete zapisane u datoteci
-- Na fotografijama nastaju stepeničasti prijelazi; ublažavaju se **ditheringom**
-- Podržava prozirnost (jedna boja palete) i jednostavnu animaciju
-
 ## TIFF --- fleksibilan spremnik
 
-- Zapis u obliku **tagova**: svaki podatak ima oznaku, tip i vrijednost
-- Podržava zapis bez sažimanja i sažimanje bez gubitka (LZW, ZIP), ali i JPEG
-- Podaci se dijele u **trake** (*strips*) ili **pločice** (*tiles*) koje se sažimaju neovisno
-- Može sadržavati više slika u jednoj datoteci, slojeve, CMYK, 16 bita po kanalu
-- Profesionalna primjena: tisak, arhiva, tehnička fotografija
+- *Tagged Image File Format* (1986.) --- nije jedan format nego **okvir** u koji stane mnogo različitih zapisa
+- Sve je opisano **tagovima**: svaki podatak ima oznaku, tip i vrijednost
+- Jedna datoteka može sadržavati **više slika**, slojeve, 16 bita po kanalu, CMYK, ICC profil
+- Podaci o pikselima dijele se u **trake** (*strips*) ili **pločice** (*tiles*) koje se obrađuju neovisno --- veliku sliku nije nužno učitati cijelu
+- Profesionalna primjena: tisak, arhiva, kartografija, medicinska i tehnička fotografija
 
-\vspace{1ex}
+\vspace{0.5ex}
 
 \begin{deklaracija}
 Ista struktura tagova temelj je i EXIF metapodataka u JPEG datotekama.
 \end{deklaracija}
+
+## TIFF --- struktura
+
+![](slike/p03_tiff_struktura.png){width=100%}
+
+## TIFF --- izbor sažimanja
+
+- Tag `Compression` određuje postupak; čitač ga mora podržavati:
+
+```{=latex}
+\begin{center}\small
+\begin{tabular}{@{}rl@{\hspace{4em}}rl@{}}
+\texttt{1} & bez sažimanja            & \texttt{32773} & PackBits (RLE)\\[0.3ex]
+\texttt{5} & LZW (bez gubitka)        & \texttt{3}, \texttt{4} & CCITT (faksimil, 1 bit)\\[0.3ex]
+\texttt{8} & ZIP / DEFLATE (bez gubitka) & \texttt{7} & JPEG (\textbf{s gubitkom})\\
+\end{tabular}
+\end{center}
+```
+
+- Zato *TIFF* sam po sebi ne jamči da je slika neizmijenjena --- treba pogledati koji je postupak upotrijebljen
+- Fleksibilnost ima cijenu: nije rijetko da neki čitač ne podržava baš svaku kombinaciju tagova
+
+\begin{deklaracija}
+Za arhivu se u pravilu bira bez sažimanja ili ZIP; JPEG unutar TIFF-a poništava razlog zbog kojeg se TIFF uopće odabire.
+\end{deklaracija}
+
+## Kada LZW pomaže, a kada odmaže
+
+![](slike/p03_tiff_lzw.png){width=74%}
+
+- LZW gradi **rječnik ponovljenih nizova**; kod koji ih zamjenjuje ima 9 do 12 bita
+- Nema li ponavljanja, 8-bitni bajt postaje 9-bitni kod --- datoteka **naraste**
+- U fotografiji u boji trojke (R,G,B) rijetko se ponavljaju doslovno
 
 ## Usporedba na istoj slici
 
@@ -289,42 +506,6 @@ Ista struktura tagova temelj je i EXIF metapodataka u JPEG datotekama.
 ![](slike/p03_jpeg_blokovi.jpg){width=100%}
 :::
 ::::::
-
-# RAW
-
-## Što je RAW
-
-- **Izravno očitanje senzora**, bez obrade i bez sažimanja s gubitkom
-- Još uvijek **CFA mozaik** --- jedna vrijednost po pikselu, ne tri
-- Dubina 12--16 bita po pikselu, linearni odziv
-- Uz podatke senzora zapisuju se postavke snimanja i puni metapodaci
-- Datoteka nije spremna za prikaz --- fotografiju treba **razviti**
-
-\vspace{1ex}
-
-\begin{deklaracija}
-Često se naziva \textbf{digitalnim negativom}, po analogiji s klasičnom fotografijom.
-\end{deklaracija}
-
-## Razvijanje
-
-![](slike/p03_raw_razvijanje.jpg){width=100%}
-
-- Odluke koje kamera inače donosi same prelaze na računalo: balans bijele, ekspozicija, kontrast, zasićenje, izoštravanje, uklanjanje šuma
-- Isti RAW može dati vrlo različite fotografije --- bez ikakve izmjene izvornih podataka
-
-## Formati i ograničenja
-
-- Format ovisi o proizvođaču i često o modelu:
-    - **CR2, CR3** (Canon), **NEF** (Nikon), **ARW** (Sony), **RAF** (Fuji), **ORF** (Olympus)
-- **DNG** (Adobe) --- pokušaj otvorenog standarda
-- Datoteke su velike, a podrška starijih programa neujednačena
-
-\vspace{1ex}
-
-\begin{deklaracija}
-RAW je najbliži onome što je senzor zabilježio, ali ni on sam po sebi ne dokazuje autentičnost: i RAW datoteka može se izmijeniti ili generirati.
-\end{deklaracija}
 
 # Spremnik i metapodaci
 
